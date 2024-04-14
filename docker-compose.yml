@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+
+  open-api-games:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+    volumes:
+      - .:/app
+    environment:
+      - ENV=dev
+      - LOG_LEVEL=debug
+      - MONGODB_URI=mongodb://open-api-games-mongo:27017/openapigames?replicaSet=rs0&retryWrites=true&w=majority&directConnection=true
+      - HTTP_ADDR=:8080
+      - API_KEY=a1s2d3f4
+    ports:
+      - 8080:8080
+    depends_on:
+      - open-api-games-mongo
+
+  open-api-games-mongo:
+    image: mongo
+    container_name: open-api-games-mongo
+    restart: always
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./tmp/data/mongo:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=openapigames
